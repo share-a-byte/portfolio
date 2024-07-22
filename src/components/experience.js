@@ -1,72 +1,121 @@
+import { useEffect, useState } from "react";
+import { motion, useAnimation } from "framer-motion";
+import { useIntersectionObserver } from "@/lib/useIntersectionObserver";
+
 export default function Experience() {
+  const controls = useAnimation();
+  const [ref, inView] = useIntersectionObserver();
+
+  useEffect(() => {
+    if (inView) {
+      controls.start("visible");
+    }
+  }, [controls, inView]);
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.3,
+        delayChildren: 0.2,
+      },
+    },
+  };
+
+  const headerVariants = {
+    hidden: { opacity: 0, y: -20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+      },
+    },
+  };
+
+  const jobVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+      },
+    },
+  };
+
   return (
-    <section className="py-12 md:py-24 lg:py-32 mx-10" id="experience">
-      <h2 className="text-3xl text-center font-bold tracking-tighter sm:text-4xl md:text-5xl">
+    <motion.section
+      ref={ref}
+      initial="hidden"
+      animate={controls}
+      variants={containerVariants}
+      className="py-12 md:py-24 lg:py-32 mx-10"
+      id="experience"
+    >
+      <motion.h2
+        variants={headerVariants}
+        className="text-3xl text-center font-bold tracking-tighter sm:text-4xl md:text-5xl"
+      >
         Past Experience
-      </h2>
-      <ol className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10 mb-10">
-        <li className="relative mb-6 sm:mb-0">
-          <IconLine icon={<BriefcaseSVG />} color="bg-green-600" />
-          <div className="mt-3 sm:pr-8 text-center sm:text-left">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Software Intern @ Versogen
-            </h3>
-            <time className="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-300">
-              June 2023 - May 2024
-            </time>
-            <p className="text-base font-normal">
-              I developed a database system and a proprietary web dashboard that
-              streamlined hundreds of hours of data collection and plotting, and
-              deployed it on a Linux server.
-            </p>
-          </div>
-        </li>
-        <li className="relative mb-6 sm:mb-0">
-          <IconLine icon={<SunSVG />} color="bg-cyan-600" />
-          <div className="mt-3 sm:pr-8 text-center sm:text-left">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              SWE Intern @ California ISO
-            </h3>
-            <time className="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-300">
-              May 2024 - August 2024
-            </time>
-            <p className="text-base font-normal">
-              Created Python scripts to interact with various APIs, developing
-              real-time responsiveness to critical power grid issues.
-            </p>
-          </div>
-        </li>
-        <li className="relative mb-6 sm:mb-0">
-          <IconLine icon={<RecycleSVG />} color="bg-violet-700" />
-          <div className="mt-3 sm:pr-8 text-center sm:text-left">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-              Part-time ML Intern @ Ensaras
-            </h3>
-            <time className="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-300">
-              May 2024 - Present
-            </time>
-            <p className="text-base font-normal">
-              Created complex visualizations with Grafana, developed web
-              dashboards and APIs, and utilized CI/CD pipelines to ensure a
-              smooth deployment process.
-            </p>
-          </div>
-        </li>
-      </ol>
-    </section>
+      </motion.h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10 mb-10">
+        <Job
+          variants={jobVariants}
+          icon={<BriefcaseSVG />}
+          color="bg-emerald-600"
+          timePeriod="June 2023 - May 2024"
+          jobTitle="Software Intern"
+          company="Versogen"
+          description="I developed a database system and a proprietary web dashboard that streamlined hundreds of hours of data collection and plotting, and deployed it on a Linux server."
+        />
+        <Job
+          variants={jobVariants}
+          icon={<SunSVG />}
+          color="bg-cyan-600"
+          timePeriod="May 2024 - August 2024"
+          jobTitle="SWE Intern"
+          company="California ISO"
+          description="Created Python scripts to interact with various APIs, developing real-time responsiveness to critical power grid issues."
+        />
+        <Job
+          variants={jobVariants}
+          icon={<RecycleSVG />}
+          color="bg-violet-700"
+          timePeriod="May 2024 - Present"
+          jobTitle="Part-time ML Intern"
+          company="Ensaras"
+          description="Created complex visualizations with Grafana, developed web dashboards and APIs, and utilized CI/CD pipelines to ensure a smooth deployment process."
+        />
+      </div>
+    </motion.section>
   );
 }
 
-function IconLine(props) {
+function Job({ variants, ...props }) {
   return (
-    <div className="flex items-center">
-      <div
-        className={`z-10 flex items-center justify-center w-10 h-10 ${props.color} rounded-full ring-0 ring-white sm:ring-8 dark:ring-gray-900 shrink-0 transition-transform duration-300 ease-in-out hover:-translate-y-2`}
-      >
-        {props.icon}
+    <motion.div variants={variants} className="relative mb-6 sm:mb-0">
+      <div className="flex items-center">
+        <div
+          className={`z-10 flex items-center justify-center w-10 h-10 ${props.color} rounded-full ring-0 ring-white sm:ring-8 dark:ring-gray-900 shrink-0 transition-transform duration-300 ease-in-out hover:-translate-y-2`}
+        >
+          {props.icon}
+        </div>
+        <div className="hidden sm:flex w-full bg-gray-200 h-0.5 dark:bg-gray-200"></div>
       </div>
-      <div className="hidden sm:flex w-full bg-gray-200 h-0.5 dark:bg-gray-200"></div>
-    </div>
+      <div className="mt-3 sm:pr-8 text-center sm:text-left">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          {props.jobTitle} @ {props.company}
+        </h3>
+        <time className="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-300">
+          {props.timePeriod}
+        </time>
+        <p className="text-base font-normal">{props.description}</p>
+      </div>
+    </motion.div>
   );
 }
 
