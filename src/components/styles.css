@@ -1,0 +1,34 @@
+.first-seperator {
+  width: 100vw; /* Full width of the viewport */
+  height: 1.3vw; /* Height of the separator */
+  background: linear-gradient(
+    to right,
+    #e0e5f5,
+    #818cf8,
+    white
+  ); /* Gradient background */
+  clip-path: polygon(
+    100% 0,
+    0 100%,
+    0 0
+  ); /* Creates a triangle shape with wider end on the left */
+  margin-top: -2.9vw; /* Adjusts the position to align properly */
+}
+
+.second-seperator {
+  width: 100vw; /* Full width of the viewport */
+  height: 1.3vw; /* Height of the separator */
+  background: linear-gradient(
+    to right,
+    #e0e5f5,
+    #818cf8,
+    #c7d2fe
+  ); /* Gradient background */
+  clip-path: polygon(
+    0 0,
+    100% 100%,
+    100% 0,
+    0 0
+  ); /* Creates a flipped triangle shape */
+  margin-top: -2.9vw; /* Adjusts the position to align properly */
+}

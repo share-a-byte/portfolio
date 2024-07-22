@@ -1,3 +1,13 @@
+const Skill = (props) => {
+  return (
+    // bg-white dark:bg-gray-950
+    <button className="p-4 rounded-lg shadow-md bg-gradient-to-r from-violet-500 to-cyan-600 hover:from-violet-900 hover:to-cyan-950">
+      <div className="flex items-center justify-center h-16">{props.icon}</div>
+      <h3 className="text-center text-sm font-medium mt-2">{props.text}</h3>
+    </button>
+  );
+};
+
 export default function Skills() {
   return (
     <section className="w-full py-12 md:py-24 lg:py-32" id="skills">
@@ -6,7 +16,7 @@ export default function Skills() {
           <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
             My Skills
           </h2>
-          <p className="mx-auto max-w-[700px] text-gray-500 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed dark:text-gray-400">
+          <p className="mx-auto max-w-[700px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
             Here are some of the technologies and tools I'm proficient in.
           </p>
         </div>
@@ -93,16 +103,6 @@ function OpenAIIcon(props) {
     </svg>
   );
 }
-
-const Skill = (props) => {
-  return (
-    // bg-white dark:bg-gray-950
-    <div className="p-4 rounded-lg shadow-md bg-indigo-600">
-      <div className="flex items-center justify-center h-16">{props.icon}</div>
-      <h3 className="text-center text-sm font-medium mt-2">{props.text}</h3>
-    </div>
-  );
-};
 
 function PythonIcon(props) {
   return (
