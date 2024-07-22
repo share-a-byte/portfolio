@@ -1,11 +1,50 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 export const NavBar = () => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  return <>{isMobile ? <MobileNavBar /> : <DesktopNavBar />}</>;
+};
+
+const DesktopNavBar = () => {
   return (
     <div className="fixed top-0 left-0 right-0 z-50 pt-5 flex justify-center">
       <SlideTabs />
     </div>
+  );
+};
+
+const MobileNavBar = () => {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleNavItemClick = () => {
+    setIsOpen(false);
+  };
+
+  return (
+    <>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="fixed top-5 right-5 z-50 p-2 bg-white rounded-full border-2 border-black"
+      >
+        <MenuIcon />
+      </button>
+      {isOpen && (
+        <div className="fixed inset-0 bg-white z-40 p-5 pt-20">
+          <MobileTabs onItemClick={handleNavItemClick} />
+        </div>
+      )}
+    </>
   );
 };
 
@@ -24,50 +63,109 @@ const SlideTabs = () => {
           opacity: 0,
         }));
       }}
-      className="relative mx-auto flex w-fit rounded-full border-2 border-black bg-white p-1"
+      className="relative mx-auto flex rounded-full border-2 border-black bg-white p-1"
     >
-      <a href="#about">
-        <Tab setPosition={setPosition}>
-          <div className="flex space-x-2">
-            <div>Home</div>
-            <HomeIcon />
-          </div>
-        </Tab>
-      </a>
-      <a href="#projects">
-        <Tab setPosition={setPosition}>
-          <div className="flex space-x-2">
-            <div>Projects</div>
-            <ProjectsIcon />
-          </div>
-        </Tab>
-      </a>
-      <a href="#experience">
-        <Tab setPosition={setPosition}>
-          <div className="flex space-x-2">
-            <div>Experience</div>
-            <ExperienceIcon />
-          </div>
-        </Tab>
-      </a>
-      <a href="#skills">
-        <Tab setPosition={setPosition}>
-          <div className="flex space-x-2">
-            <div>Skills</div>
-            <SkillIcon />
-          </div>
-        </Tab>
-      </a>
-      <a href="#contact">
-        <Tab setPosition={setPosition}>
-          <div className="flex space-x-2" href="#contact">
-            <div>Contact</div>
-            <ContactIcon />
-          </div>
-        </Tab>
-      </a>
+      <NavItem
+        href="#about"
+        text="Home"
+        Icon={HomeIcon}
+        setPosition={setPosition}
+      />
+      <NavItem
+        href="#projects"
+        text="Projects"
+        Icon={ProjectsIcon}
+        setPosition={setPosition}
+      />
+      <NavItem
+        href="#experience"
+        text="Experience"
+        Icon={ExperienceIcon}
+        setPosition={setPosition}
+      />
+      <NavItem
+        href="#skills"
+        text="Skills"
+        Icon={SkillIcon}
+        setPosition={setPosition}
+      />
+      <NavItem
+        href="#contact"
+        text="Contact"
+        Icon={ContactIcon}
+        setPosition={setPosition}
+      />
       <Cursor position={position} />
     </ul>
+  );
+};
+
+const MobileTabs = ({ onItemClick }) => {
+  return (
+    <ul className="space-y-4 flex flex-col items-end">
+      {" "}
+      {/* Right-aligned items */}
+      <MobileNavItem
+        href="#about"
+        text="Home"
+        Icon={HomeIcon}
+        onClick={onItemClick}
+      />
+      <MobileNavItem
+        href="#projects"
+        text="Projects"
+        Icon={ProjectsIcon}
+        onClick={onItemClick}
+      />
+      <MobileNavItem
+        href="#experience"
+        text="Experience"
+        Icon={ExperienceIcon}
+        onClick={onItemClick}
+      />
+      <MobileNavItem
+        href="#skills"
+        text="Skills"
+        Icon={SkillIcon}
+        onClick={onItemClick}
+      />
+      <MobileNavItem
+        href="#contact"
+        text="Contact"
+        Icon={ContactIcon}
+        onClick={onItemClick}
+      />
+    </ul>
+  );
+};
+
+const NavItem = ({ href, text, Icon, setPosition }) => {
+  return (
+    <a href={href}>
+      <Tab setPosition={setPosition}>
+        <div className="flex items-center space-x-2">
+          <span>{text}</span>
+          <Icon className="w-5 h-5" />
+        </div>
+      </Tab>
+    </a>
+  );
+};
+
+const MobileNavItem = ({ href, text, Icon, onClick }) => {
+  return (
+    <li className="w-full">
+      {" "}
+      {/* Full width to allow right alignment */}
+      <a
+        href={href}
+        className="flex items-center justify-end space-x-4 text-lg text-black"
+        onClick={onClick}
+      >
+        <span>{text}</span>
+        <Icon className="w-6 h-6" />
+      </a>
+    </li>
   );
 };
 
@@ -79,16 +177,14 @@ const Tab = ({ children, setPosition }) => {
       ref={ref}
       onMouseEnter={() => {
         if (!ref?.current) return;
-
         const { width } = ref.current.getBoundingClientRect();
-
         setPosition({
           left: ref.current.offsetLeft,
           width,
           opacity: 1,
         });
       }}
-      className="relative z-10 block cursor-pointer px-3 py-1.5 text-xs text-white mix-blend-difference md:px-5 md:py-3 md:text-base"
+      className="relative z-10 block cursor-pointer px-3 py-1.5 text-sm text-white mix-blend-difference md:px-5 md:py-3 md:text-base"
     >
       {children}
     </li>
@@ -101,10 +197,29 @@ const Cursor = ({ position }) => {
       animate={{
         ...position,
       }}
-      className="absolute z-0 h-7 rounded-full bg-black md:h-12"
+      className="absolute z-0 h-8 rounded-full bg-black md:h-12"
     />
   );
 };
+
+function MenuIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      strokeWidth={1.5}
+      stroke="#000000"
+      className="size-6"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+      />
+    </svg>
+  );
+}
 
 function ContactIcon() {
   return (
