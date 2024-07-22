@@ -19,9 +19,9 @@ export default function About() {
               <b>Hi there, I&apos;m Vani! 👋🏽</b>
             </p>
             <p className="max-w-[600px] text-white-100 md:text-xl pl-1">
-              I&apos;m a dedicated CS student with a passion for leveraging
-              technology to tackle <b>systemic challenges</b> and drive{" "}
-              <b>meaningful change!</b>
+              I&apos;m a dedicated CS student @ UIUC with a passion for
+              leveraging technology to tackle <b>systemic challenges</b> and
+              drive <b>meaningful change!</b>
             </p>
             <div className="flex flex-col gap-2 min-[400px]:flex-row">
               <Link
