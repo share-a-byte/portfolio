@@ -63,7 +63,7 @@ export default function Skills() {
             My Skills
           </h2>
           <p className="mx-auto max-w-[700px] md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-            Here are some of the technologies and tools I'm proficient in.
+            Here are some of the technologies and tools I&apos;m proficient in.
           </p>
         </motion.div>
         <motion.div

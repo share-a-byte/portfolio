@@ -16,10 +16,10 @@ export default function About() {
               Vani Ramesh
             </h1>
             <p className="max-w-[600px] text-white-100 md:text-xl pl-1">
-              <b>Hi there, I'm Vani! 👋🏽</b>
+              <b>Hi there, I&apos;m Vani! 👋🏽</b>
             </p>
             <p className="max-w-[600px] text-white-100 md:text-xl pl-1">
-              I'm a dedicated CS student with a passion for leveraging
+              I&apos;m a dedicated CS student with a passion for leveraging
               technology to tackle <b>systemic challenges</b> and drive{" "}
               <b>meaningful change!</b>
             </p>
