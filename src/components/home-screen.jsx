@@ -10,7 +10,7 @@ import Experience from "./experience";
 
 export function HomeScreen() {
   return (
-    <div className="flex flex-col min-h-[100vh]">
+    <div className="flex flex-col min-h-[100vh] bg-black">
       <NavBar />
       <main className="flex-1">
         <About />
