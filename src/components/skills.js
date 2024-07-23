@@ -50,7 +50,7 @@ export default function Skills() {
   };
 
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32" id="skills">
+    <section className="w-full py-12 md:py-24 lg:py-32 text-white" id="skills">
       <motion.div
         ref={setRef}
         initial="hidden"

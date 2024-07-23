@@ -15,10 +15,10 @@ export default function About() {
             <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none text-cyan-200 tracking-normal">
               Vani Ramesh
             </h1>
-            <p className="max-w-[600px] text-white-100 md:text-xl pl-1">
+            <p className="max-w-[600px] text-white md:text-xl pl-1">
               <b>Hi there, I&apos;m Vani! 👋🏽</b>
             </p>
-            <p className="max-w-[600px] text-white-100 md:text-xl pl-1">
+            <p className="max-w-[600px] text-white md:text-xl pl-1">
               I&apos;m a dedicated CS student @ UIUC with a passion for
               leveraging technology to tackle <b>systemic challenges</b> and
               drive <b>meaningful change!</b>

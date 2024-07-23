@@ -68,7 +68,10 @@ export default function Projects() {
   }, []);
 
   return (
-    <section className="w-full py-12 md:py-24 lg:py-32" id="projects">
+    <section
+      className="w-full py-12 md:py-24 lg:py-32 text-white"
+      id="projects"
+    >
       <motion.div
         ref={ref}
         initial="hidden"
@@ -86,7 +89,7 @@ export default function Projects() {
         </motion.div>
         <motion.div
           variants={headerVariants}
-          className="flex justify-center space-x-3 mt-5 text-black items-center"
+          className="flex flex-wrap justify-center space-x-3 mt-5 text-black items-center"
         >
           <div className="text-white">Categories:</div>
           <button className="bg-emerald-400 py-2 px-5 rounded-full flex hover:bg-emerald-300 cursor-auto">
@@ -145,7 +148,7 @@ function Project({ title, color, description, image, icon, onClick }) {
           {icon}
         </motion.div>
       </div>
-      <div className="bg-white p-4 dark:bg-gray-950">
+      <div className="p-4 dark:bg-gray-950">
         <h3 className="font-bold text-xl">{title}</h3>
         <p className="text-sm">{description}</p>
       </div>

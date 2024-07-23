@@ -53,7 +53,7 @@ export default function Experience() {
       initial="hidden"
       animate={controls}
       variants={containerVariants}
-      className="py-12 md:py-24 lg:py-32 mx-10"
+      className="py-12 md:py-24 lg:py-32 mx-10 text-white"
       id="experience"
     >
       <motion.h2
@@ -98,19 +98,19 @@ export default function Experience() {
 function Job({ variants, ...props }) {
   return (
     <motion.div variants={variants} className="relative mb-6 sm:mb-0">
-      <div className="flex items-center">
+      <div className="flex items-center text-white">
         <div
           className={`z-10 flex items-center justify-center w-10 h-10 ${props.color} rounded-full ring-0 ring-white sm:ring-8 dark:ring-gray-900 shrink-0 transition-transform duration-300 ease-in-out hover:-translate-y-2`}
         >
           {props.icon}
         </div>
-        <div className="hidden sm:flex w-full bg-gray-200 h-0.5 dark:bg-gray-200"></div>
+        <div className="sm:flex w-full bg-gray-200 h-0.5"></div>
       </div>
       <div className="mt-3 sm:pr-8 text-center sm:text-left">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h3 className="text-lg font-semibold text-white">
           {props.jobTitle} @ {props.company}
         </h3>
-        <time className="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-300">
+        <time className="block mb-2 text-sm font-normal leading-none text-gray-300">
           {props.timePeriod}
         </time>
         <p className="text-base font-normal">{props.description}</p>
