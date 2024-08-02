@@ -76,7 +76,7 @@ export default function Experience() {
           variants={jobVariants}
           icon={<SunSVG />}
           color="bg-cyan-600"
-          timePeriod="May 2024 - August 2024"
+          timePeriod="May 2024 - July 2024"
           jobTitle="SWE Intern"
           company="California ISO"
           description="Created Python scripts to interact with various APIs, developing real-time responsiveness to critical power grid issues."
@@ -85,8 +85,8 @@ export default function Experience() {
           variants={jobVariants}
           icon={<RecycleSVG />}
           color="bg-violet-700"
-          timePeriod="May 2024 - Present"
-          jobTitle="Part-time ML Intern"
+          timePeriod="July 2024 - Present"
+          jobTitle="Machine Learning Intern"
           company="Ensaras"
           description="Created complex visualizations with Grafana, developed web dashboards and APIs, and utilized CI/CD pipelines to ensure a smooth deployment process."
         />
