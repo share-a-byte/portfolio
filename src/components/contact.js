@@ -1,9 +1,19 @@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+
+import { useForm, ValidationError } from "@formspree/react";
 
 export default function ContactForm() {
+  const [state, handleSubmit] = useForm("xkgwvavd");
+  if (state.succeeded) {
+    return (
+      <p className="w-full text-center py-5 text-lg">
+        Thanks for contacting me! I'll get back to you soon.
+      </p>
+    );
+  }
+
   return (
     <section className="w-full py-12 md:py-24 lg:py-32 text-white" id="contact">
       <div className="container mx-auto px-4 md:px-6">
@@ -17,11 +27,7 @@ export default function ContactForm() {
           </p>
         </div>
         <div className="max-w-md mx-auto mt-8">
-          <form
-            className="space-y-4"
-            action="https://formsubmit.co/el/voliho"
-            method="POST"
-          >
+          <form className="space-y-4" onSubmit={handleSubmit}>
             <input
               type="hidden"
               name="_subject"
@@ -36,6 +42,11 @@ export default function ContactForm() {
                 required
                 type="text"
               />
+              <ValidationError
+                prefix="Name"
+                field="name"
+                errors={state.errors}
+              />
             </div>
             <div>
               <Label htmlFor="email">Email</Label>
@@ -45,6 +56,11 @@ export default function ContactForm() {
                 placeholder="darthvader@sith.com"
                 required
                 type="email"
+              />
+              <ValidationError
+                prefix="Email"
+                field="email"
+                errors={state.errors}
               />
             </div>
             <div>
@@ -56,10 +72,18 @@ export default function ContactForm() {
                 required
                 rows={5}
               />
+              <ValidationError
+                prefix="Message"
+                field="message"
+                errors={state.errors}
+              />
             </div>
-            <Button className="w-full" type="submit">
+            <button
+              disabled={state.submitting}
+              className="text-black font-semibold rounded-lg bg-white w-full py-3 text-sm hover:bg-gray-200"
+            >
               Send Message
-            </Button>
+            </button>
           </form>
         </div>
       </div>
