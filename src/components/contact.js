@@ -9,7 +9,7 @@ export default function ContactForm() {
   if (state.succeeded) {
     return (
       <p className="w-full text-center py-5 text-lg">
-        Thanks for contacting me! I'll get back to you soon.
+        Thanks for contacting me! I&apos;ll get back to you soon.
       </p>
     );
   }
