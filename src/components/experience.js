@@ -85,7 +85,7 @@ export default function Experience() {
           variants={jobVariants}
           icon={<RecycleSVG />}
           color="bg-violet-700"
-          timePeriod="July 2024 - Present"
+          timePeriod="July 2024 - September 2024"
           jobTitle="Machine Learning Intern"
           company="Ensaras"
           description="Created complex visualizations with Grafana, developed web dashboards and APIs, and utilized CI/CD pipelines to ensure a smooth deployment process."
