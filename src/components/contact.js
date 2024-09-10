@@ -8,7 +8,7 @@ export default function ContactForm() {
   const [state, handleSubmit] = useForm("xkgwvavd");
   if (state.succeeded) {
     return (
-      <p className="w-full text-center py-5 text-lg">
+      <p className="w-full text-center py-5 text-lg text-white">
         Thanks for contacting me! I&apos;ll get back to you soon.
       </p>
     );
