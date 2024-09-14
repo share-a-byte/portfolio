@@ -100,7 +100,7 @@ function Job({ variants, ...props }) {
     <motion.div variants={variants} className="relative mb-6 sm:mb-0">
       <div className="flex items-center text-white">
         <div
-          className={`z-10 flex items-center justify-center w-10 h-10 ${props.color} rounded-full ring-0 ring-white sm:ring-8 dark:ring-gray-900 shrink-0 transition-transform duration-300 ease-in-out hover:-translate-y-2`}
+          className={`z-10 flex items-center justify-center w-10 h-10 ${props.color} rounded-full ring-0 sm:ring-8 ring-gray-900 shrink-0 transition-transform duration-300 ease-in-out hover:-translate-y-2`}
         >
           {props.icon}
         </div>

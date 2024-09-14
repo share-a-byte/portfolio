@@ -75,7 +75,7 @@ export default function About() {
               alt="Vani Ramesh"
               className="rounded-lg object-cover shadow-md shadow-white"
               height={400}
-              src="/projects/me.png"
+              src="/projects/me.jpg"
               style={{
                 aspectRatio: "400/400",
                 objectFit: "cover",
