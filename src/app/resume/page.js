@@ -6,7 +6,7 @@ export default function ResumeOpener() {
   return (
     <div style={{ width: "100%", height: "100vh" }}>
       <object
-        data="/files/VANI_RESUME_2027.pdf"
+        data="/files/VANI_RAMESH_2027.pdf"
         type="application/pdf"
         width="100%"
         height="100%"
