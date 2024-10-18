@@ -7,6 +7,7 @@ import ContactForm from "./contact";
 import About from "./about";
 import Projects from "./projects";
 import Experience from "./experience";
+import Blog from "./blogs";
 
 export function HomeScreen() {
   return (
@@ -22,6 +23,8 @@ export function HomeScreen() {
         <Skills />
         <div className="second-seperator"></div>
         <ContactForm />
+        <div className="first-seperator"></div>
+        <Blog />
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t border-indigo-300">
         <p className="text-base text-white">
