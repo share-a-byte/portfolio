@@ -1,3 +1,5 @@
+import BlogCards from "./postcard";
+
 export default function Blog() {
   return (
     <section className="w-full py-12 md:py-24 lg:py-32 text-white" id="contact">
@@ -6,9 +8,10 @@ export default function Blog() {
           <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
             Blog
           </h2>
-          <p className="mx-auto max-w-[700px] text-white md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-            Stay tuned, coming soon!!!
+          <p className="mx-auto pb-3 max-w-[700px] text-white md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+            My thoughts recently!
           </p>
+          <BlogCards />
         </div>
       </div>
     </section>
