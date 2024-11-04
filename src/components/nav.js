@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { motion } from "framer-motion";
+// HEROICONS
 
 export const NavBar = () => {
   const [isMobile, setIsMobile] = useState(false);
@@ -95,6 +96,12 @@ const SlideTabs = () => {
         Icon={ContactIcon}
         setPosition={setPosition}
       />
+      <NavItem
+        href="#blog"
+        text="Blog"
+        Icon={BlogIcon}
+        setPosition={setPosition}
+      />
       <Cursor position={position} />
     </ul>
   );
@@ -103,8 +110,6 @@ const SlideTabs = () => {
 const MobileTabs = ({ onItemClick }) => {
   return (
     <ul className="space-y-4 flex flex-col items-end">
-      {" "}
-      {/* Right-aligned items */}
       <MobileNavItem
         href="#about"
         text="Home"
@@ -135,7 +140,29 @@ const MobileTabs = ({ onItemClick }) => {
         Icon={ContactIcon}
         onClick={onItemClick}
       />
+      <MobileNavItem
+        href="#blog"
+        text="Blog"
+        Icon={BlogIcon}
+        onClick={onItemClick}
+      />
     </ul>
+  );
+};
+
+const MobileNavItem = ({ href, text, Icon, onClick }) => {
+  return (
+    <li className="w-full">
+      <a
+        href={href}
+        className="flex items-center justify-end space-x-4 text-lg text-black"
+        onClick={onClick}
+      >
+        <span className="text-lg">{text}</span>{" "}
+        {/* Ensure consistent font size */}
+        <Icon className="w-6 h-6" />
+      </a>
+    </li>
   );
 };
 
@@ -149,23 +176,6 @@ const NavItem = ({ href, text, Icon, setPosition }) => {
         </div>
       </Tab>
     </a>
-  );
-};
-
-const MobileNavItem = ({ href, text, Icon, onClick }) => {
-  return (
-    <li className="w-full">
-      {" "}
-      {/* Full width to allow right alignment */}
-      <a
-        href={href}
-        className="flex items-center justify-end space-x-4 text-lg text-black"
-        onClick={onClick}
-      >
-        <span>{text}</span>
-        <Icon className="w-6 h-6" />
-      </a>
-    </li>
   );
 };
 
@@ -216,6 +226,25 @@ function MenuIcon() {
         strokeLinecap="round"
         strokeLinejoin="round"
         d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
+      />
+    </svg>
+  );
+}
+
+function BlogIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke-width="1.5"
+      stroke="currentColor"
+      class="size-6"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672Zm-7.518-.267A8.25 8.25 0 1 1 20.25 10.5M8.288 14.212A5.25 5.25 0 1 1 17.25 10.5"
       />
     </svg>
   );
