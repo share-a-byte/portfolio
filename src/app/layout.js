@@ -1,7 +1,7 @@
 import { Raleway } from "next/font/google";
 import "./globals.css";
 
-const font = Raleway({ subsets: ["latin"] });
+const font = Raleway({ subsets: ["latin"], display: "swap" });
 
 export const metadata = {
   title: "Vani Ramesh",
