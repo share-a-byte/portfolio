@@ -1,73 +1,87 @@
 // src/data/posts.js
 
 const posts = [
-  // In your posts.js file
+  {
+    slug: "best-food-in-urbana-champaign",
+    image: "/blog/food_pic.png",
+    timeAgo: "October 28, 2024",
+    readTime: "10 min",
+    hidden: true,
+    title: "Best Food in Urbana-Champaign",
+    excerpt:
+      "As a dedicated foodie, let me take you on a personal tour of my absolute favorite spots at UIUC—from neighborhood staples to under-the-radar gems that I've stumbled upon during my culinary adventures!",
+    content: `
+As someone who’s spent plenty of afternoons exploring the best food of UIUC, I’m excited to share some personal favorites. Here are the places I keep coming back to—sometimes for a quick bite between classes, other times for a long dinner with friends!
 
-  //   {
-  //     slug: "best-food-in-champaign",
-  //     image: "/blog/food_pic.png",
-  //     timeAgo: "October 28, 2024",
-  //     readTime: "10 min",
-  //     title: "Best Food in Champaign",
-  //     excerpt:
-  //       "First and foremost, I'm a foodie 😋. Let me tell you about some of my favorite spots in Champaign, both well-known and hidden gems!",
-  //     content: `
-  //   First and foremost, I'm a foodie 😋. Let me share some of my favorite spots in Champaign, both popular and hidden gems!
+### 1. The Shawarma Joint (Champaign)
+For me, nothing beats fresh, savory shawarma after a long study session. It was the very first restauraunt I came to on campus, and though it's pretty popular, it's a classic for a reason!
 
-  //   ![Delicious Food](https://via.placeholder.com/800x400?text=Delicious+Food)
+- **Why I Love It:** The perfect balance of spices and textures in every bite.
+- **Signature Dish:** Falafel Bowl
+- **Location:** 627 East Green Street
+- **Insider Tip:** Ask for extra pickled turnips for a tangy punch!
 
-  //   ## Top Restaurants to Visit
+<img
+  src="https://popmenucloud.com/eydxgclt/c8edbd7f-cbbf-4b53-ae3d-198070866f9a.jpg"
+  alt="Shawarma joint"
+  style="max-width: 350px; width: 100%; height: auto;"
+  class="mx-auto my-6 rounded-lg shadow-lg"
+/>
 
-  //   ### 1. The Cozy Corner
+### 2. Bangkok Thai (Urbana)
+If I’m craving thai food, Bangkok Thai is my go-to. From the sweet and spicy notes of their Pad Thai to the comforting aroma of their Tom Yum soup, this is my favorite lunch spot!
 
-  //   The Cozy Corner offers a warm atmosphere and delightful dishes that make you feel right at home.
+- **Why I Love It:** Bold flavors that remind me of my travels.
+- **Signature Dish:** Pad Thai
+- **Location:** 410 East Green Street
+- **Insider Tip:** Try the yellow curry - trust me
 
-  //   - **Signature Dish:** Grandma's Homemade Lasagna
-  //   - **Location:** 123 Main Street
+<img
+  src="https://media-cdn.tripadvisor.com/media/photo-s/10/95/b7/bd/spicy-pad-thai.jpg"
+  alt="Bangkok thai"
+  style="max-width: 350px; width: 100%; height: auto;"
+  class="mx-auto my-6 rounded-lg shadow-lg"
+/>
 
-  //   ![Cozy Corner](https://via.placeholder.com/400x300?text=Cozy+Corner)
 
-  //   ### 2. Urban Eats
+### 3. Signature Grill (Champaign)
+After a rough exam, Signature Grill always hits. They have great dosas and kothu parotthas, and though it might not be the most authentic, I still love it :)
 
-  //   A modern take on classic favorites, Urban Eats is the place to be for innovative cuisine.
+- **Why I Love It:** The tikka sauce
+- **Signature Dish:** Veg kotthu parottha
+- **Location:** 505 East Green Street
+- **Insider Tip:** Get the rose milk!!!
 
-  //   - **Signature Dish:** Avocado Toast Deluxe
-  //   - **Location:** 456 Elm Street
+<img
+  src="https://tb-static.uber.com/prod/image-proc/processed_images/4b6853b7b4a2cb2890673202f94d8539/783282f6131ef2258e5bcd87c46aa87e.jpeg"
+  alt="Signature Grill"
+  style="max-width: 350px; width: 100%; height: auto;"
+  class="mx-auto my-6 rounded-lg shadow-lg"
+/>
 
-  //   ![Urban Eats](https://via.placeholder.com/400x300?text=Urban+Eats)
+### 4. Sticky Rice (Urbana)
+Whenever I'm ok with making the long trek down to Downtown Champaign, Sticky Rice is absolutely my go to. It has great food, great vibes - pretty much everything you could ask for!
 
-  //   ## Hidden Gems
+- **Why I Love It:** The sticky rice of course :)
+- **Signature Dish:** Mango Sticky Rice (dessert you can’t skip!)
+- **Location:** 415 Norht Neil Street
+- **Insider Tip:** Get the fried tofu!
 
-  //   ### The Secret Garden Café
+<img
+  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRjwJypFCjfA2RmMwSTiP-AL4hQ7VR-lvz86w&s"
+  alt="Sticky Rice"
+  style="max-width: 350px; width: 100%; height: auto;"
+  class="mx-auto my-6 rounded-lg shadow-lg"
+/>
 
-  //   Tucked away in a quiet alley, The Secret Garden Café is a tranquil escape from the hustle and bustle.
+## Conclusion
 
-  //   - **Signature Drink:** Lavender Lemonade
-  //   - **Ambiance:** Outdoor seating surrounded by greenery
+> "One cannot think well, love well, sleep well, if one has not dined well." – Virginia Woolf
 
-  //   ![Secret Garden Café](https://via.placeholder.com/800x400?text=Secret+Garden+Café)
-
-  //   ## Street Food Delights
-
-  //   Don't miss out on Champaign's vibrant street food scene!
-
-  //   - **Food Trucks:** A variety of options from tacos to ice cream
-  //   - **Farmers' Market:** Fresh produce and homemade goods every weekend
-
-  //   ![Street Food Fest](https://via.placeholder.com/800x400?text=Street+Food+Fest)
-
-  //   > "One cannot think well, love well, sleep well, if one has not dined well." – Virginia Woolf
-
-  //   ## Conclusion
-
-  //   Champaign has something to offer every palate. Whether you're a fan of cozy cafés or modern eateries, you're sure to find a favorite spot here.
-
-  //   **Bon appétit!**
-
-  //     `,
-  //     imagePos: "cover",
-  //   },
-  // In your posts.js file
+**Bon appétit!**
+    `,
+    imagePos: "cover",
+  },
 
   {
     slug: "sprained-ankle-x-hackathon",
@@ -75,10 +89,10 @@ const posts = [
     timeAgo: "November 3, 2024",
     readTime: "15 min",
     title: "Sprained Ankle x Hackathon",
+    hidden: false,
     excerpt:
       "Spraining my ankle right after the hackathon started was rough 🤕, but I started working on my first AR project in the hospital waiting room!",
     content: `
-
 Fresh out of a hackathon opening ceremony, brimming with ideas and eagerly eyeing my barbeque pizza, I got a <em>tad</em> careless. 
 
 The stairs were tall and hard, and as I tripped and fell, I tried my best to catch my pizza 😭. Though I succeeded, my efforts would probably have been better served at protecting my ankle, which almost immediately began to balloon.
@@ -90,7 +104,7 @@ The stairs were tall and hard, and as I tripped and fell, I tried my best to cat
   class="mx-auto my-6 rounded-lg shadow-lg"
 />
 
-I was with my friend Anshi (shoutout Anshi ❤️) , who slowly helped me walk back home, and I ignored the swelling, deciding to sleep it off. As it turns out, this probably wasn't the greatest decision.
+I was with my friend Anshi (shoutout Anshi ❤️), who slowly helped me walk back home, and I ignored the swelling, deciding to sleep it off. As it turns out, this probably wasn't the greatest decision.
 
 ### The Next Morning
 
@@ -99,12 +113,12 @@ When I woke up the next morning, with a foot faintly resembling a clown shoe, I 
 
 <img
   src="/blog/boot.png"
-  alt="Me and Anshi waiting"
+  alt="My boot"
   style="max-width: 350px; width: 100%; height: auto;"
   class="mx-auto my-6 rounded-lg shadow-lg"
 />
 
-Since it was the weekend, and the x-ray technician had to drive in, I was sitting in the waiting room for a pretty long time. The hackathons only prompt was that our project <em>had</em> to use AI, 
+Since it was the weekend, and the x-ray technician had to drive in, I was sitting in the waiting room for a pretty long time. The hackathon's only prompt was that our project <em>had</em> to use AI, 
 but I narrowed it down to a learning based platform, and ... Memora was born!
 
 <img 
@@ -115,12 +129,12 @@ but I narrowed it down to a learning based platform, and ... Memora was born!
 />
 ## The Idea
 
-In ancient times, people would hold massive books worth of information in their minds. They did this through using "memory palaces". You might've heard about it in shows like Sherlock or Hannibal.
+In ancient times, people would hold massive books worth of information in their minds. They did this using "memory palaces". You might've heard about it in shows like Sherlock or Hannibal.
 
 ### The Story
 
 <em>Simonides of Ceos</em> was a Greek poet at a very important party. It was a room full of aristocrats, military leaders, and philosophers, and when Simonides went outside
-during dinner to recieve a message, he never could've anticipated that the roof would collapse. Though everyone was crushed, he identified every single body.
+during dinner to receive a message, he never could've anticipated that the roof would collapse. Though everyone was crushed, he identified every single body.
 
 **How?** A memory palace. By using the physical location to arrange mental imagery, he remembered an incredible amount of information in order. To this day,
 people use this technique to memorize digits of Pi, the periodic table, and so much more.
@@ -147,10 +161,10 @@ I finally had an idea - time to get to the code!!!
 - **Things I knew:** How to learn :)
 
 Since I didn't have any experience with native iOS development, the very first thing I did was download the latest version of XCode 
-(which took 3 hours !!). While it was downloading, I started playing around with the Gemini API with Python, getting it to generate
+(which took 3 hours !!). While it was downloading, I started playing around with the Gemini API using Python, getting it to generate
 objects for a memory palace. 
 
-Finally, when Xcode was setup, I opened up Xcode's Reality Composer Pro, and started playing around with usdz files. I've never worked with
+Finally, when Xcode was set up, I opened up Xcode's Reality Composer Pro and started playing around with usdz files. I've never worked with
 3D object software before, so this part was awesome 💖
 
 <img 
@@ -159,13 +173,14 @@ Finally, when Xcode was setup, I opened up Xcode's Reality Composer Pro, and sta
     class="mx-auto"
 />
 
-By this time I ended up getting called in for an X-ray, which came back inconclusive (they didn't know if it was a fracture or a sprain), and I went home and crashed 😴. 
-The next morning, though I woke up at 3 AM and got back to work!
+By this time, I ended up getting called in for an x-ray, which came back inconclusive (they didn't know if it was a fracture or a sprain), and I went home and crashed 😴. 
+The next morning, though, I woke up at 3 AM and got back to work!
 
 Starting out with some basic Swift tutorials, I built out a simple starting frontend, and made my first object in ARKit, a solid cube.
+
 <img 
     src="https://general-pusher-cms.s3.amazonaws.com/blog/building_ar_with_arkit_and_scenekit_09_blender_712da5e229.png"
-    alt="Reality Composer Pro"
+    alt="ARKit Cube"
     class="mx-auto"
 /> 
 
@@ -176,19 +191,19 @@ it was time to submit. Here's what I had at that point!
 <iframe width="560" height="315" class="mx-auto" src="https://www.youtube.com/embed/RJMOueJuGog?si=TOUxpPjTz3RfE89q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
 
 ## Some Difficulties + Lessons Learned
-This was a huge learning process, with tech that was all new for me, but here are some specific bumps that I spent a lot of time diving into:
-1. **iOS Compatability:** Since I was testing an AR app, I had to use a physical phone instead of a simulator. There was just one problem with that - my phone is on an extremely old iOS version 😭. It took a <em>lot</em> of playing around to understand the dependencies between the different iOS versions and ARKit, but I learned a lot about iOS dev from it!
-2. **Music Feature:** I was playing around with adding Gemini generated audio as a user enters the AR memory palace, but it turned out to be a huge struggle to embed that audio so that it would dynamically generate, and play only when the user opened the memory palace. It's a work in progress 😅
+This was a huge learning process, with tech that was all new for me. Here are some specific bumps I spent a lot of time working through:
+1. **iOS Compatibility:** Since I was testing an AR app, I had to use a physical phone instead of a simulator. There was just one problem—my phone is on an extremely old iOS version 😭. It took a *lot* of playing around to understand the dependencies between different iOS versions and ARKit, but I learned so much about iOS dev from it!
+2. **Music Feature:** I wanted to add Gemini-generated audio as a user enters the AR memory palace, but it turned out to be a huge struggle to embed that audio dynamically and have it play only when the user opened the memory palace. It's still a work in progress 😅
 
-**Next Steps:** Continuing to expand on the app so that the text and the AR objects produced are grouped together much better, and making sure the
+**Next Steps:** I plan to continue expanding the app so that the text and AR objects produced are more cohesively grouped, ensuring the
 visualization looks good regardless of room size.
 
 > "The beautiful thing about learning is nobody can take it away from you." – B.B. King
 
 ## Conclusion
 
-This was the most chaotic weekend I've had in a while, but now I have a newfound understand of Xcode and RealityKit, and I own a boot!
-  `,
+This was the most chaotic weekend I've had in a while, but now I have a newfound understanding of Xcode and RealityKit, and I own a boot!
+    `,
     imagePos: "contain",
   },
 ];
