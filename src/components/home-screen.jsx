@@ -28,7 +28,7 @@ export function HomeScreen() {
       </main>
       <footer className="flex flex-col gap-2 sm:flex-row py-6 w-full shrink-0 items-center px-4 md:px-6 border-t border-indigo-300">
         <p className="text-base text-white">
-          © 2024 Vani Ramesh. All rights reserved.
+          © 2025 Vani Ramesh. All rights reserved.
         </p>
       </footer>
     </div>

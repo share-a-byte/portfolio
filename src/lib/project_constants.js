@@ -58,6 +58,17 @@ export const HappyIcon = () => {
 
 export const projects = [
   {
+    title: "Nebula",
+    color: "indigo",
+    description:
+      "Designed a fun website highlighting some of my own favorite websites!",
+    image: "/projects/nebula.png",
+    link: "https://nebula-i8nv.vercel.app/",
+    icon: <HappyIcon />,
+    accomplishments: "Created in a few hours!",
+    tech: "Next.js, TailwindCSS, Supabase",
+  },
+  {
     title: "Natra",
     color: "emerald",
     description:
