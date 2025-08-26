@@ -1,7 +1,13 @@
 import { useEffect } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { useIntersectionObserver } from "@/lib/useIntersectionObserver";
-import { BriefcaseBusinessIcon, FuelIcon, Recycle, Sun } from "lucide-react";
+import {
+  BriefcaseBusinessIcon,
+  FuelIcon,
+  Recycle,
+  ShoppingCart,
+  Sun,
+} from "lucide-react";
 
 export default function Experience() {
   const controls = useAnimation();
@@ -63,7 +69,7 @@ export default function Experience() {
       >
         Past Experience
       </motion.h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-10 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mt-10 mb-10">
         <Job
           variants={jobVariants}
           icon={<BriefcaseBusinessIcon />}
@@ -95,10 +101,19 @@ export default function Experience() {
           variants={jobVariants}
           icon={<FuelIcon />}
           color="bg-pink-300"
-          timePeriod="Nov 2024 - Present"
+          timePeriod="Jan 2025 - May 2025"
           jobTitle="Data Engineering Intern"
           company="Ameren"
           description="Worked with Databricks and AWS to streamline data processing pipelines."
+        />
+        <Job
+          variants={jobVariants}
+          icon={<ShoppingCart />}
+          color="bg-yellow-200"
+          timePeriod="May 2025 - Aug 2025"
+          jobTitle="AI/ML Intern"
+          company="Amazon"
+          description="Implemented LLM inference model in OpenRTB bidding system, designing large-scale A/B tests and using distributed compute to analyze large datasets."
         />
       </div>
     </motion.section>
