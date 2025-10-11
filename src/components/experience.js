@@ -4,6 +4,7 @@ import { useIntersectionObserver } from "@/lib/useIntersectionObserver";
 import {
   BriefcaseBusinessIcon,
   FuelIcon,
+  LineChart,
   Recycle,
   ShoppingCart,
   Sun,
@@ -67,35 +68,26 @@ export default function Experience() {
         variants={headerVariants}
         className="text-3xl text-center font-bold tracking-tighter sm:text-4xl md:text-5xl"
       >
-        Past Experience
+        Work Experience
       </motion.h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mt-10 mb-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10 mb-10">
         <Job
           variants={jobVariants}
-          icon={<BriefcaseBusinessIcon />}
-          color="bg-emerald-300"
-          timePeriod="June 2023 - May 2024"
+          icon={<LineChart />}
+          color="bg-blue-500"
+          timePeriod="Feb 2026"
           jobTitle="Software Intern"
-          company="Versogen"
-          description="Developed a database system and a proprietary web dashboard that streamlined hundreds of hours of data collection and plotting, deployed it on a Linux server."
+          company="Five Rings"
+          description="Implementing trading system enhancements, using C++."
         />
         <Job
           variants={jobVariants}
-          icon={<Sun />}
-          color="bg-cyan-300"
-          timePeriod="May 2024 - July 2024"
-          jobTitle="SWE Intern"
-          company="California ISO"
-          description="Created Python scripts to interact with various APIs, developing real-time responsiveness to critical power grid issues."
-        />
-        <Job
-          variants={jobVariants}
-          icon={<Recycle />}
-          color="bg-violet-300"
-          timePeriod="July 2024 - September 2024"
-          jobTitle="Full-Stack Intern"
-          company="Ensaras"
-          description="Created complex visualizations with Grafana, developed web dashboards and APIs, and utilized CI/CD pipelines to ensure a smooth deployment process."
+          icon={<ShoppingCart />}
+          color="bg-yellow-200"
+          timePeriod="May 2025 - Aug 2025"
+          jobTitle="AI/ML Intern"
+          company="Amazon"
+          description="Implemented LLM inference model in OpenRTB bidding system, designing large-scale A/B tests and using distributed compute to analyze large datasets."
         />
         <Job
           variants={jobVariants}
@@ -108,12 +100,30 @@ export default function Experience() {
         />
         <Job
           variants={jobVariants}
-          icon={<ShoppingCart />}
-          color="bg-yellow-200"
-          timePeriod="May 2025 - Aug 2025"
-          jobTitle="AI/ML Intern"
-          company="Amazon"
-          description="Implemented LLM inference model in OpenRTB bidding system, designing large-scale A/B tests and using distributed compute to analyze large datasets."
+          icon={<Recycle />}
+          color="bg-violet-300"
+          timePeriod="July 2024 - September 2024"
+          jobTitle="Full-Stack Intern"
+          company="Ensaras"
+          description="Created complex visualizations with Grafana, developed web dashboards and APIs, and utilized CI/CD pipelines to ensure a smooth deployment process."
+        />
+        <Job
+          variants={jobVariants}
+          icon={<Sun />}
+          color="bg-cyan-300"
+          timePeriod="May 2024 - July 2024"
+          jobTitle="SWE Intern"
+          company="California ISO"
+          description="Created Python scripts to interact with various APIs, developing real-time responsiveness to critical power grid issues."
+        />
+        <Job
+          variants={jobVariants}
+          icon={<BriefcaseBusinessIcon />}
+          color="bg-emerald-300"
+          timePeriod="June 2023 - May 2024"
+          jobTitle="Software Intern"
+          company="Versogen"
+          description="Developed a database system and a proprietary web dashboard that streamlined hundreds of hours of data collection and plotting, deployed it on a Linux server."
         />
       </div>
     </motion.section>

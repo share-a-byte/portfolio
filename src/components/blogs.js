@@ -1,3 +1,4 @@
+import { FolderInput } from "lucide-react";
 import BlogCards from "./blogcard";
 
 export default function Blog() {
@@ -11,6 +12,10 @@ export default function Blog() {
           <p className="mx-auto pb-3 max-w-[700px] text-white md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
             My thoughts recently!
           </p>
+          <div className="bg-gray-100 rounded-2xl flex py-2 px-2 items-center w-fit">
+            <FolderInput fill="#ff00ff" size="40px" />
+            <p className="text-black text-2xl pl-2 font-bold">Hello</p>
+          </div>
           <BlogCards />
         </div>
       </div>
