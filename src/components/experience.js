@@ -70,12 +70,13 @@ export default function Experience() {
       >
         Work Experience
       </motion.h2>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-10 mb-10">
         <Job
           variants={jobVariants}
           icon={<LineChart />}
           color="bg-blue-500"
-          timePeriod="Feb 2026"
+          timePeriod="Jan 2026"
           jobTitle="Software Intern"
           company="Five Rings"
           description="Implementing trading system enhancements, using C++."

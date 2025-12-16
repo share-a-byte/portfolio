@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>GPU Jitter</title>
+    <style>
+      body {
+        background-color: white;
+        margin-left: 50px;
+      }
+    </style>
+    <script>
+      function compile(vsSource, fsSource) {
+        const vs = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(vs, vsSource);
+        gl.compileShader(vs);
+        if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS))
+          throw new Error(gl.getShaderInfoLog(vs));
+
+        const fs = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(fs, fsSource);
+        gl.compileShader(fs);
+        if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS))
+          throw new Error(gl.getShaderInfoLog(fs));
+
+        const program = gl.createProgram();
+        gl.attachShader(program, vs);
+        gl.attachShader(program, fs);
+        gl.linkProgram(program);
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS))
+          throw new Error(gl.getProgramInfoLog(program));
+        return program;
+      }
+
+      async function setup() {
+        window.gl = document.querySelector("canvas").getContext("webgl2");
+
+        const vs = await fetch("vs.glsl").then((res) => res.text());
+        const fs = await fetch("fs.glsl").then((res) => res.text());
+        window.program = compile(vs, fs);
+
+        gl.useProgram(program);
+
+        tick(0); // WILL KEEP GOING BY ITSELF, just call once
+      }
+
+      function drawVertices(seconds) {
+        const vertices = [
+          0.0,
+          0.0, // 0
+          8.0,
+          0.0, // 1
+          8.0,
+          2.0, // 2
+          6.0,
+          2.0, // 3
+          2.0,
+          2.0, // 4
+          0.0,
+          2.0, // 5
+          6.0,
+          10.0, // 6
+          8.0,
+          10.0, // 7
+          8.0,
+          12.0, // 8
+          0.0,
+          12.0, // 9
+          0.0,
+          10.0, // 10
+          2.0,
+          10.0, // 11
+        ].map((v) => (v / 15.0) * 2.0 - 0.8); // scaling between -1 and 1
+
+        const outlinedVertices = [
+          9.0, -1.0, -1.0, -1.0, 9.0, 3.0, 7.0, 3.0, 1.0, 3.0, -1.0, 3.0, 7.0,
+          11.0, 9.0, 11.0, 9.0, 13.0, -1.0, 13.0, 1.0, 11.0, -1.0, 11.0,
+        ].map((v) => (v / 15.0) * 2.0 - 0.8);
+        const outlineIndices = [
+          1, 0, 5, 5, 2, 0, 3, 4, 10, 3, 10, 6, 7, 11, 9, 7, 8, 9,
+        ];
+
+        // Index buffer - indices
+        const indices = [
+          0, 1, 5, 5, 2, 1, 3, 4, 11, 3, 11, 6, 7, 10, 9, 7, 8, 9,
+        ];
+
+        const vertBuffer = gl.createBuffer(); // create buffer
+        gl.bindBuffer(gl.ARRAY_BUFFER, vertBuffer);
+
+        const indexBuffer = gl.createBuffer(); // create buffer
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer); // bind buffer
+
+        gl.vertexAttribPointer(0, 2, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(0);
+
+        const options = [
+          [-0.05, -0.003],
+          [0.003, -0.005],
+          [0.01, 0.1],
+          [-0.08, 0.03],
+        ];
+        const options2 = [
+          [-0.01, -0.01],
+          [0.05, -0.05],
+          [0.05, 0.05],
+          [-0.05, 0.05],
+        ];
+
+        const coordLoc = gl.getUniformLocation(program, "coordLoc");
+        const index2 = 3 - Math.floor(seconds % 4);
+        gl.uniform2fv(coordLoc, new Float32Array(options2[index2]));
+
+        // CLEAR COLOR
+        gl.clearColor(0.0, 0.0, 0.0, 0.0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+
+        const IlliniBlue = new Float32Array([0.075, 0.16, 0.292, 1]);
+        const IlliniOrange = new Float32Array([1, 0.373, 0.02, 1]);
+        const colorLoc = gl.getUniformLocation(program, "color");
+
+        gl.bufferData(
+          gl.ELEMENT_ARRAY_BUFFER,
+          new Uint16Array(outlineIndices),
+          gl.STATIC_DRAW
+        );
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(outlinedVertices),
+          gl.STATIC_DRAW
+        );
+        gl.uniform4fv(colorLoc, IlliniBlue);
+        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+
+        const index = Math.floor(seconds % 4);
+        gl.uniform2fv(coordLoc, new Float32Array(options[index]));
+
+        gl.bufferData(
+          gl.ELEMENT_ARRAY_BUFFER,
+          new Uint16Array(indices),
+          gl.STATIC_DRAW
+        );
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(vertices),
+          gl.STATIC_DRAW
+        );
+        gl.uniform4fv(colorLoc, IlliniOrange);
+        gl.drawElements(gl.TRIANGLES, indices.length, gl.UNSIGNED_SHORT, 0);
+      }
+
+      function tick(milliseconds) {
+        const seconds = milliseconds / 400;
+        drawVertices(seconds);
+        requestAnimationFrame(tick); // <- only call this here, nowhere else
+      }
+
+      window.addEventListener("load", setup);
+    </script>
+  </head>
+  <body>
+    <canvas width="700" height="600"></canvas>
+  </body>
+</html>
