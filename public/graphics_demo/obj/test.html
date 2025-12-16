@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Single-file Example</title>
+    <script src="wrapWebGL2.js"></script>
+    <script src="math.js"></script>
+
+    <script id="vert" type="glsl">
+      #version 300 es
+      layout(location=0) in vec4 position;
+      layout(location=1) in vec3 normal;
+      layout(location=2) in vec3 color;
+
+      uniform mat4 mv;
+      uniform mat4 p;
+      uniform vec4 eyepos;
+      uniform vec4 lightdir;
+
+      out vec3 color2;
+      out vec3 vnormal;
+      out vec3 halfway;
+
+      void main() {
+          vec4 coords = mv * position;
+          gl_Position = p * coords;
+          color2 = color;
+          vnormal = mat3(mv) * normal;
+
+          vec3 temp = normalize(eyepos.xyz - coords.xyz);
+          halfway = normalize(temp + lightdir.xyz);
+      }
+    </script>
+
+    <script id="frag" type="glsl">
+      #version 300 es
+      precision highp float;
+      out vec4 fragColor;
+      in vec3 color2;
+      in vec3 vnormal;
+
+      uniform vec4 lightdir;
+      uniform vec3 lightcolor;
+      in vec3 halfway;
+
+      void main() {
+          vec3 normalized = normalize(vnormal);
+
+          float lambert = max(dot(normalized, lightdir.xyz), 0.0);
+          float blinn = pow(max(dot(normalized, halfway), 0.0), 50.0);
+
+          fragColor = vec4((color2.rgb) * lambert * lightcolor
+          + (lightcolor * blinn), 1.0);
+      }
+    </script>
+
+    <script id="vertimage" type="glsl">
+      #version 300 es
+      layout(location=0) in vec4 position;
+      layout(location=1) in vec3 normal;
+      layout(location=2) in vec3 colorUnused;
+      layout(location=3) in vec2 texcoord;
+
+      uniform mat4 mv;
+      uniform mat4 p;
+      uniform vec4 eyepos;
+      uniform vec4 lightdir;
+
+      out vec2 vertexCoord;
+
+      out vec3 vnormal;
+      out vec3 halfway;
+
+      void main() {
+          vec4 coords = mv * position;
+          gl_Position = p * coords;
+          vnormal = mat3(mv) * normal;
+
+          vec3 temp = normalize(eyepos.xyz - coords.xyz);
+          halfway = normalize(temp + lightdir.xyz);
+
+          vertexCoord = texcoord;
+      }
+    </script>
+    <script id="fragimage" type="glsl">
+      #version 300 es
+      precision highp float;
+      out vec4 fragColor;
+      in vec3 vnormal;
+
+      uniform vec4 lightdir;
+      uniform vec3 lightcolor;
+      in vec3 halfway;
+
+      uniform sampler2D image;
+      in vec2 vertexCoord;
+
+      void main() {
+          vec3 normalized = normalize(vnormal);
+
+          float lambert = max(dot(normalized, lightdir.xyz), 0.0);
+
+          vec3 texcol = texture(image, vertexCoord).rgb;
+          fragColor = vec4(texcol * lambert * lightcolor, 1.0);
+      }
+    </script>
+
+    <script>
+      let shader_norm;
+      let shader_image;
+
+      /**
+       * Given the source code of a vertex and fragment shader, compiles them,
+       * and returns the linked program.
+       */
+      function compileShader(vs_source, fs_source) {
+        const vs = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(vs, vs_source);
+        gl.compileShader(vs);
+        if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
+          console.error(gl.getShaderInfoLog(vs));
+          throw Error("Vertex shader compilation failed");
+        }
+
+        const fs = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(fs, fs_source);
+        gl.compileShader(fs);
+        if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
+          console.error(gl.getShaderInfoLog(fs));
+          throw Error("Fragment shader compilation failed");
+        }
+
+        const program = gl.createProgram();
+        gl.attachShader(program, vs);
+        gl.attachShader(program, fs);
+        gl.linkProgram(program);
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+          console.error(gl.getProgramInfoLog(program));
+          throw Error("Linking failed");
+        }
+
+        const uniforms = {};
+        for (
+          let i = 0;
+          i < gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+          i += 1
+        ) {
+          let info = gl.getActiveUniform(program, i);
+          uniforms[info.name] = gl.getUniformLocation(program, info.name);
+        }
+        program.uniforms = uniforms;
+
+        return program;
+      }
+
+      /**
+       * Sends per-vertex data to the GPU and connects it to a VS input
+       *
+       * @param data    a 2D array of per-vertex data (e.g. [[x,y,z,w],[x,y,z,w],...])
+       * @param loc     the layout location of the vertex shader's `in` attribute
+       * @param mode    (optional) gl.STATIC_DRAW, gl.DYNAMIC_DRAW, etc
+       *
+       * @returns the ID of the buffer in GPU memory; useful for changing data later
+       */
+      function supplyDataBuffer(data, loc, mode) {
+        if (mode === undefined) mode = gl.STATIC_DRAW;
+
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        const f32 = new Float32Array(data.flat());
+        gl.bufferData(gl.ARRAY_BUFFER, f32, mode);
+
+        gl.vertexAttribPointer(loc, data[0].length, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(loc);
+
+        return buf;
+      }
+
+      /**
+       * Creates a Vertex Array Object and puts into it all of the data in the given
+       * JSON structure, which should have the following form:
+       *
+       * ````
+       * {"triangles": a list of of indices of vertices
+       * ,"attributes":
+       *  [ a list of 1-, 2-, 3-, or 4-vectors, one per vertex to go in location 0
+       *  , a list of 1-, 2-, 3-, or 4-vectors, one per vertex to go in location 1
+       *  , ...
+       *  ]
+       * }
+       * ````
+       *
+       * @returns an object with four keys:
+       *  - mode = the 1st argument for gl.drawElements
+       *  - count = the 2nd argument for gl.drawElements
+       *  - type = the 3rd argument for gl.drawElements
+       *  - vao = the vertex array object for use with gl.bindVertexArray
+       */
+      function setupGeomery(geom) {
+        var triangleArray = gl.createVertexArray();
+        gl.bindVertexArray(triangleArray);
+
+        for (let i = 0; i < geom.attributes.length; i += 1) {
+          let data = geom.attributes[i];
+          supplyDataBuffer(data, i);
+        }
+
+        var indices = new Uint16Array(geom.triangles.flat());
+        var indexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+
+        return {
+          mode: gl.TRIANGLES,
+          count: indices.length,
+          type: gl.UNSIGNED_SHORT,
+          vao: triangleArray,
+        };
+      }
+    </script>
+
+    <!-- All the other code in one big script element. -->
+    <script>
+      /** Draw one frame */
+      function draw(seconds) {
+        gl.clearColor(1.0, 1.0, 1.0, 1.0); // f(...[1,2,3]) means f(1,2,3)
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.useProgram(program);
+
+        if (window.geom) {
+          gl.bindVertexArray(geom.vao);
+
+          let eye = [0, 0, 3];
+          let m = m4mul(m4rotY(seconds), m4rotX(-Math.PI / 2));
+          let v = m4view(eye, [0, 0, 0], [0, 1, 0]);
+
+          gl.uniform3fv(program.uniforms.lightcolor, [1, 1, 1]);
+
+          let lightdir = m4mul(v, [1, 2, 1, 0]);
+          let lightdirnorm = normalize([lightdir[0], lightdir[1], lightdir[2]]);
+
+          gl.uniform4fv(program.uniforms.lightdir, [...lightdirnorm, 0]);
+          gl.uniform4fv(program.uniforms.eyepos, m4mul(v, [...eye, 1]));
+
+          gl.uniformMatrix4fv(program.uniforms.mv, false, m4mul(v, m));
+          gl.uniformMatrix4fv(program.uniforms.p, false, p);
+          gl.drawElements(geom.mode, geom.count, geom.type, 0);
+        }
+      }
+
+      // /** Compute any time-varying or animated aspects of the scene */
+      function tick(milliseconds) {
+        let seconds = milliseconds / 1000;
+
+        draw(seconds);
+        requestAnimationFrame(tick);
+      }
+
+      function textureShader(image) {
+        let slot = 0;
+        let texture = gl.createTexture();
+        gl.activeTexture(gl.TEXTURE0 + slot);
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.RGBA,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          image
+        );
+
+        gl.texParameteri(
+          gl.TEXTURE_2D,
+          gl.TEXTURE_MIN_FILTER,
+          gl.LINEAR_MIPMAP_LINEAR
+        );
+        gl.generateMipmap(gl.TEXTURE_2D);
+
+        gl.uniform1i(shader_image.uniforms.image, slot);
+      }
+
+      function parseSlash(data) {
+        if (data.includes("/")) {
+          // has slash inside
+          let results = data.split("/");
+          let first = Number(results[0]) - 1;
+          let second = Number(results[1]) - 1;
+          let third = Number(results[2]) - 1;
+          return [first, second, third];
+        } else {
+          return [Number(data) - 1, -1, -1];
+        }
+      }
+
+      /** Resizes the canvas to completely fill the screen */
+      function fillScreen() {
+        let canvas = document.querySelector("canvas");
+        document.body.style.margin = "0";
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+        canvas.style.width = "";
+        canvas.style.height = "";
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        window.p = m4perspNegZ(0.1, 15, 1, canvas.width, canvas.height);
+      }
+
+      /** Compile, link, set up geometry */
+      window.addEventListener("load", async (event) => {
+        window.gl = document.querySelector("canvas").getContext(
+          "webgl2",
+          // optional configuration object: see https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext
+          { antialias: false, depth: true, preserveDrawingBuffer: true }
+        );
+        let vs = document.querySelector("#vert").textContent.trim();
+        let fs = document.querySelector("#frag").textContent.trim();
+
+        shader_norm = compileShader(vs, fs);
+
+        let vs_image = document.querySelector("#vertimage").textContent.trim();
+        let fs_image = document.querySelector("#fragimage").textContent.trim();
+
+        shader_image = compileShader(vs_image, fs_image);
+
+        window.program = shader_norm;
+        gl.enable(gl.DEPTH_TEST);
+        fillScreen();
+        window.addEventListener("resize", fillScreen);
+
+        document.querySelector("#submit").addEventListener("click", (event) => {
+          const filepath = document.querySelector("#filepath").value;
+          const imagepath = document.querySelector("#imagepath").value;
+
+          let tempV = [];
+          let tempText = [];
+          let tempNormal = [];
+          let tempColor = [];
+          let indexMapping = {};
+
+          let grid = {
+            triangles: [],
+            attributes: [
+              [], // position
+              [], // normals
+              [], // color
+              [], // texture coordinates
+            ],
+          };
+
+          fetch(filepath).then((data) => {
+            if (data.ok) {
+              data.text().then((text) => {
+                text.split("\n").forEach((lineTemp) => {
+                  let line = lineTemp.trim().replace(/\s+/g, " ");
+
+                  if (line.substring(0, 2) === "vn") {
+                    let res = line.split(" ");
+                    let x = Number(res[1]);
+                    let y = Number(res[2]);
+                    let z = Number(res[3]);
+                    tempNormal.push([x, y, z]);
+                  } else if (line.substring(0, 2) === "vt") {
+                    let res = line.split(" ");
+                    let x = Number(res[1]);
+                    let y = Number(res[2]);
+                    let z = Number(res[3]);
+                    tempText.push([x, y, z]);
+                  } else if (line[0] == "v") {
+                    let res = line.split(" ");
+
+                    // Push vertex pos
+                    let x = Number(res[1]);
+                    let y = Number(res[2]);
+                    let z = Number(res[3]);
+                    tempV.push([x, y, z]);
+                    if (res.length > 4) {
+                      let cx = Number(res[4]);
+                      let cy = Number(res[5]);
+                      let cz = Number(res[6]);
+                      tempColor.push([cx, cy, cz]);
+                    }
+                  } else if (line[0] == "f") {
+                    let res = line.split(" ");
+
+                    let i = 1;
+                    let tmp = parseSlash(res[1]);
+                    let vnumfirst = tmp[0];
+                    let tnumfirst = tmp[1];
+                    let normnumfirst = tmp[2];
+
+                    let key = res[1]; // "3/5/2" etc.
+
+                    if (!(key in indexMapping)) {
+                      let newIndex = grid.attributes[0].length;
+                      indexMapping[key] = newIndex;
+
+                      // POSITION
+                      grid.attributes[0].push(tempV[vnumfirst]);
+
+                      // NORMAL
+                      if (normnumfirst >= 0)
+                        grid.attributes[1].push(tempNormal[normnumfirst]);
+                      else grid.attributes[1].push([0, 0, 0]);
+
+                      // COLOR
+                      if (vnumfirst < tempColor.length)
+                        grid.attributes[2].push(tempColor[vnumfirst]);
+                      else grid.attributes[2].push([0.8, 0.8, 0.8]); // default
+
+                      // UV
+                      if (tnumfirst >= 0)
+                        grid.attributes[3].push(
+                          tempText[tnumfirst].slice(0, 2)
+                        );
+                      else grid.attributes[3].push([0, 0]);
+                    }
+
+                    for (let j = 2; j < res.length - 1; j++) {
+                      for (let k = 0; k < 2; k++) {
+                        tmp = parseSlash(res[j + k]);
+                        let vnum = tmp[0];
+                        let tnum = tmp[1];
+                        let normnum = tmp[2];
+
+                        let key = res[j + k];
+
+                        if (!(key in indexMapping)) {
+                          let newIndex = grid.attributes[0].length;
+                          indexMapping[key] = newIndex;
+
+                          // push position
+                          grid.attributes[0].push(tempV[vnum]);
+
+                          // push normal
+                          if (normnum >= 0) {
+                            grid.attributes[1].push(tempNormal[normnum]);
+                          } else {
+                            grid.attributes[1].push([0, 0, 0]);
+                          }
+
+                          // push color
+                          if (vnum < tempColor.length)
+                            grid.attributes[2].push(tempColor[vnum]);
+                          else grid.attributes[2].push([0.8, 0.8, 0.8]);
+
+                          // push texcoord
+                          if (tnum >= 0)
+                            grid.attributes[3].push(tempText[tnum].slice(0, 2));
+                          else grid.attributes[3].push([0, 0]);
+                        }
+                      }
+
+                      grid.triangles.push([
+                        indexMapping[res[1]],
+                        indexMapping[res[j]],
+                        indexMapping[res[j + 1]],
+                      ]);
+                    }
+                  }
+                });
+
+                // DONE PARSING! First scaling
+                let min_x = 1000000;
+                let max_x = -1000000;
+                let min_y = 1000000;
+                let max_y = -1000000;
+                let min_z = 1000000;
+                let max_z = -1000000;
+                for (let i = 0; i < grid.attributes[0].length; i++) {
+                  min_x = Math.min(min_x, grid.attributes[0][i][0]);
+                  max_x = Math.max(max_x, grid.attributes[0][i][0]);
+                  min_y = Math.min(min_y, grid.attributes[0][i][1]);
+                  max_y = Math.max(max_y, grid.attributes[0][i][1]);
+                  min_z = Math.min(min_z, grid.attributes[0][i][2]);
+                  max_z = Math.max(max_z, grid.attributes[0][i][2]);
+                }
+
+                // Apply scaling factor
+                let max_sep = Math.max(
+                  max_x - min_x,
+                  max_y - min_y,
+                  max_z - min_z
+                );
+                for (let i = 0; i < grid.attributes[0].length; i++) {
+                  grid.attributes[0][i] = mul(
+                    grid.attributes[0][i],
+                    2 / max_sep
+                  );
+                }
+
+                // Step 2: Center the object
+                let total = [0, 0, 0];
+                for (let i = 0; i < grid.attributes[0].length; i++) {
+                  total = add(total, grid.attributes[0][i]);
+                }
+                let avg = div(total, grid.attributes[0].length);
+                for (let i = 0; i < grid.attributes[0].length; i++) {
+                  grid.attributes[0][i] = sub(grid.attributes[0][i], avg);
+                }
+
+                if (grid.attributes[2].length === 0) {
+                  // No color -> provide a light grey
+                  for (let i = 0; i < grid.attributes[0].length; i++) {
+                    grid.attributes[2].push([211 / 255, 211 / 255, 211 / 255]);
+                  }
+                }
+
+                if (tempNormal.length === 0) {
+                  // No normals given
+                  tempNormal = [];
+
+                  for (let i = 0; i < grid.attributes[0].length; i++) {
+                    tempNormal.push([0, 0, 0]);
+                  }
+
+                  for (let i = 0; i < grid.triangles.length; i++) {
+                    let ind1 = grid.triangles[i][0];
+                    let ind2 = grid.triangles[i][1];
+                    let ind3 = grid.triangles[i][2];
+
+                    let p0 = grid.attributes[0][ind1];
+                    let p1 = grid.attributes[0][ind2];
+                    let p2 = grid.attributes[0][ind3];
+
+                    let edge1 = sub(p2, p0);
+                    let edge2 = sub(p1, p0);
+                    let crossprod = cross(edge2, edge1);
+
+                    tempNormal[ind1] = add(tempNormal[ind1], crossprod);
+                    tempNormal[ind2] = add(tempNormal[ind2], crossprod);
+                    tempNormal[ind3] = add(tempNormal[ind3], crossprod);
+                  }
+
+                  console.log("HIT heere");
+
+                  for (let i = 0; i < grid.attributes[0].length; i++) {
+                    tempNormal[i] = normalize(tempNormal[i]);
+                  }
+
+                  grid.attributes[1] = tempNormal;
+                }
+
+                let grid_notext = JSON.parse(JSON.stringify(grid));
+                grid_notext.attributes.pop();
+
+                if (imagepath != "") {
+                  let img = new Image();
+                  img.crossOrigin = "anonymous";
+                  img.src = imagepath;
+
+                  img.addEventListener("load", () => {
+                    if (grid.attributes[3].length == 0) {
+                      for (let i = 0; i < grid.attributes[0].length; i++) {
+                        grid.attributes[3].push([0, 0]); // use top-left as u, v
+                      }
+                    } // otherwise, the vt already pushed in
+
+                    window.program = shader_image;
+                    gl.useProgram(shader_image);
+                    textureShader(img);
+                    window.geom = setupGeomery(grid);
+                  });
+
+                  img.addEventListener("error", () => {
+                    window.program = shader_norm;
+                    gl.useProgram(shader_norm);
+                    window.geom = setupGeomery(grid_notext);
+                  });
+                } else {
+                  console.log("HERE");
+                  window.program = shader_norm;
+                  gl.useProgram(shader_norm);
+                  console.log("HERE: ", grid_notext);
+                  window.geom = setupGeomery(grid_notext);
+                }
+              });
+            }
+          });
+        });
+
+        const filepath = document.querySelector("#filepath");
+        filepath.value = "suzanne.obj";
+        const imagepath = document.querySelector("#imagepath");
+        imagepath.value = "example.jpg";
+        document.querySelector("#submit").click();
+
+        requestAnimationFrame(tick);
+      });
+    </script>
+    <style>
+      body {
+        margin: 0;
+        border: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100vh;
+      }
+      .controls {
+        flex: 0 0 auto;
+      }
+      .controls > * {
+        margin: 1em;
+      }
+      .display {
+        flex-grow: 1;
+        line-height: 0rem;
+      }
+    </style>
+  </head>
+  <body>
+    <form class="controls" action="javascript:void(0);">
+      <input id="filepath" type="text" value="" placeholder="File path" />
+      <input id="imagepath" type="text" value="" placeholder="Image path" />
+      <input id="submit" type="submit" value="Regenerate Terrain" />
+    </form>
+    <div class="display">
+      <canvas width="300" height="300"></canvas>
+    </div>
+  </body>
+</html>
