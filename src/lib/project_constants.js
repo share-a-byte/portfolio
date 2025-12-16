@@ -58,6 +58,16 @@ export const HappyIcon = () => {
 
 export const projects = [
   {
+    title: "Graphics Projects",
+    color: "fuchsia",
+    description: "Some custom graphics I've created in WebGL.",
+    image: "/projects/graphics_img.png",
+    link: "https://www.vaniramesh.com/graphics",
+    icon: <HappyIcon />,
+    accomplishments: "Created in a few hours!",
+    tech: "WebGL2",
+  },
+  {
     title: "Nebula",
     color: "indigo",
     description:
