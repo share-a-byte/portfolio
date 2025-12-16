@@ -11,22 +11,59 @@ export default function Graphics() {
         <GraphicsDemo
           explanation={
             <ul>
-              <li>Constructed a 2D model using geometry.</li>
-              <li>Moved computation from the CPU to the GPU.</li>
+              <li>Constructed a 2D model geometry from scratch.</li>
+              <li>
+                Reframed sequential CPU logic as SIMD-style GPU computation
+              </li>
             </ul>
           }
           path="/graphics_demo/gpu_jitter/index.html"
           expTop={true}
         />
         <GraphicsDemo
-          title="3D Model Viewer"
+          explanation={
+            <ul>
+              <li>Complex matrix geometry</li>
+              <li>Simulated solar system to scale</li>
+            </ul>
+          }
           path="/graphics_demo/orbits/orbits.html"
         />
 
         <GraphicsDemo
-          title="3D Model Viewer"
+          explanation={
+            <ul>
+              <li>Generating large synthetic 3D datasets.</li>
+              <li>Mapping 1D data to higher dimensions.</li>
+            </ul>
+          }
           path="/graphics_demo/textures/textures.html"
           expTop={true}
+        />
+      </div>
+      <div className="flex justify-center space-x-16 mt-20">
+        <div className="w-fit max-w-lg">
+          <GraphicsDemo
+            explanation={
+              <ul>
+                <li>
+                  Interactive control with a dynamic 3D environment, based on
+                  mathematical principles.
+                </li>
+                <li>Managing interactive 3D lighting.</li>
+              </ul>
+            }
+            path="/graphics_demo/drive/drive.html"
+            expTop={true}
+          />
+        </div>
+        <GraphicsDemo
+          explanation={
+            <ul>
+              <li>Custom parser for 3D geometries in a variety of formats.</li>
+            </ul>
+          }
+          path="/graphics_demo/obj/test.html"
         />
       </div>
     </div>

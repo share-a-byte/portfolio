@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Single-file Example</title>
+
+    <script src="wrapWebGL2.js"></script>
+    <script src="math.js"></script>
+
+    <script id="vert" type="glsl">
+      #version 300 es
+      layout(location=0) in vec4 position;
+      layout(location=1) in vec4 color;
+      layout(location=2) in vec3 normal;
+
+      uniform mat4 mv;
+      uniform mat4 p;
+      uniform vec4 lightdir;
+
+      out vec4 color2;
+      out vec3 vnormal;
+
+      out vec4 worldpos;
+
+      void main() {
+          vec4 coords = mv * position;
+          gl_Position = p * coords;
+          color2 = color;
+          vnormal = mat3(mv) * normal;
+          worldpos = position;
+      }
+    </script>
+
+    <script id="frag" type="glsl">
+      #version 300 es
+      precision highp float;
+      out vec4 fragColor;
+      in vec4 color2;
+      in vec3 vnormal;
+
+      uniform vec4 lightdir;
+      uniform vec3 lightcolor;
+      uniform vec4 eyepos;
+
+      in vec4 worldpos;
+
+      void main() {
+          vec3 normalized = normalize(vnormal);
+
+          vec3 viewdir = normalize(eyepos.xyz - worldpos.xyz);
+          vec3 halfway = normalize(viewdir + lightdir.xyz);
+
+          float lambert = max(dot(normalized, lightdir.xyz), 0.0);
+          float blinn = pow(max(dot(normalized, halfway), 0.0), 50.0);
+
+          fragColor = vec4((color2.rgb) * lambert * lightcolor
+          + (lightcolor * blinn * 0.7), color2.a);
+      }
+    </script>
+
+    <!-- Code I don't expect to change. -->
+    <script>
+      let gridsize;
+      let faults;
+      let grid;
+
+      const IdentityMatrix = new Float32Array([
+        1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1,
+      ]);
+
+      /**
+       * Given the source code of a vertex and fragment shader, compiles them,
+       * and returns the linked program.
+       */
+      function compileShader(vs_source, fs_source) {
+        const vs = gl.createShader(gl.VERTEX_SHADER);
+        gl.shaderSource(vs, vs_source);
+        gl.compileShader(vs);
+        if (!gl.getShaderParameter(vs, gl.COMPILE_STATUS)) {
+          console.error(gl.getShaderInfoLog(vs));
+          throw Error("Vertex shader compilation failed");
+        }
+
+        const fs = gl.createShader(gl.FRAGMENT_SHADER);
+        gl.shaderSource(fs, fs_source);
+        gl.compileShader(fs);
+        if (!gl.getShaderParameter(fs, gl.COMPILE_STATUS)) {
+          console.error(gl.getShaderInfoLog(fs));
+          throw Error("Fragment shader compilation failed");
+        }
+
+        const program = gl.createProgram();
+        gl.attachShader(program, vs);
+        gl.attachShader(program, fs);
+        gl.linkProgram(program);
+        if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+          console.error(gl.getProgramInfoLog(program));
+          throw Error("Linking failed");
+        }
+
+        const uniforms = {};
+        for (
+          let i = 0;
+          i < gl.getProgramParameter(program, gl.ACTIVE_UNIFORMS);
+          i += 1
+        ) {
+          let info = gl.getActiveUniform(program, i);
+          uniforms[info.name] = gl.getUniformLocation(program, info.name);
+        }
+        program.uniforms = uniforms;
+
+        return program;
+      }
+
+      /**
+       * Sends per-vertex data to the GPU and connects it to a VS input
+       *
+       * @param data    a 2D array of per-vertex data (e.g. [[x,y,z,w],[x,y,z,w],...])
+       * @param loc     the layout location of the vertex shader's `in` attribute
+       * @param mode    (optional) gl.STATIC_DRAW, gl.DYNAMIC_DRAW, etc
+       *
+       * @returns the ID of the buffer in GPU memory; useful for changing data later
+       */
+      function supplyDataBuffer(data, loc, mode) {
+        if (mode === undefined) mode = gl.STATIC_DRAW;
+
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        const f32 = new Float32Array(data.flat());
+        gl.bufferData(gl.ARRAY_BUFFER, f32, mode);
+
+        gl.vertexAttribPointer(loc, data[0].length, gl.FLOAT, false, 0, 0);
+        gl.enableVertexAttribArray(loc);
+
+        return buf;
+      }
+
+      function scalarLerp(t, a, b) {
+        return a + t * (b - a);
+      }
+
+      /**
+       * Creates a Vertex Array Object and puts into it all of the data in the given
+       * JSON structure, which should have the following form:
+       *
+       * ````
+       * {"triangles": a list of of indices of vertices
+       * ,"attributes":
+       *  [ a list of 1-, 2-, 3-, or 4-vectors, one per vertex to go in location 0
+       *  , a list of 1-, 2-, 3-, or 4-vectors, one per vertex to go in location 1
+       *  , ...
+       *  ]
+       * }
+       * ````
+       *
+       * @returns an object with four keys:
+       *  - mode = the 1st argument for gl.drawElements
+       *  - count = the 2nd argument for gl.drawElements
+       *  - type = the 3rd argument for gl.drawElements
+       *  - vao = the vertex array object for use with gl.bindVertexArray
+       */
+      function setupGeomery(geom) {
+        var triangleArray = gl.createVertexArray();
+        gl.bindVertexArray(triangleArray);
+
+        for (let i = 0; i < geom.attributes.length; i += 1) {
+          let data = geom.attributes[i];
+          supplyDataBuffer(data, i);
+        }
+
+        var indices = new Uint16Array(geom.triangles.flat());
+        var indexBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, indexBuffer);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, indices, gl.STATIC_DRAW);
+
+        return {
+          mode: gl.TRIANGLES,
+          count: indices.length,
+          type: gl.UNSIGNED_SHORT,
+          vao: triangleArray,
+        };
+      }
+
+      /**
+       * Generates a random grid of size (gridsize x gridsize) and applies faults to it.
+       * The faults are applied by randomly displacing the vertices of the grid along the
+       * normal vector of the plane defined by the vertex and its two neighbors.
+       * The amount of displacement is proportional to the distance from the vertex to
+       * the midpoint of the line segment connecting the two neighbors.
+       * The faults are also normalized to be within the range [-0.5, 0.5] after application.
+       *
+       * @return an object with four keys:
+       *  - mode = the 1st argument for gl.drawElements
+       *  - count = the 2nd argument for gl.drawElements
+       *  - type = the 3rd argument for gl.drawElements
+       *  - vao = the vertex array object for use with gl.bindVertexArray
+       */
+      function generateGrid() {
+        gridsize = Math.floor(Math.random() * 150 + 50);
+        faults = Math.floor(Math.random() * 50) + 100;
+
+        grid = {
+          triangles: [],
+          attributes: [
+            // position
+            [],
+            // color
+            [],
+            // normals
+            [],
+          ],
+        };
+
+        for (let i = 0; i < gridsize; i++) {
+          for (let j = 0; j < gridsize; j++) {
+            let x_val = (i - gridsize / 2) / (gridsize / 2);
+            let y_val = (j - gridsize / 2) / (gridsize / 2);
+            grid.attributes[0].push([x_val, y_val, 0]);
+
+            grid.attributes[1].push([90 / 255, 70 / 255, 10 / 255]);
+          }
+        }
+
+        for (let i = 0; i <= gridsize - 2; i++) {
+          for (let j = 0; j <= gridsize - 2; j++) {
+            // find the "n" at the start of that row
+            let n_val = i * gridsize + j;
+            grid.triangles.push([n_val, n_val + 1, n_val + gridsize]);
+            grid.triangles.push([
+              n_val + 1,
+              n_val + gridsize,
+              n_val + gridsize + 1,
+            ]);
+          }
+        }
+
+        let fault_delta = 0.5;
+        let c = 1;
+        let R = 2;
+
+        // FAULTING
+        for (let i = 0; i < faults; i++) {
+          // 1. Generate a point p
+          let rand_x = (Math.random() - 0.5) * 2;
+          let rand_y = (Math.random() - 0.5) * 2;
+
+          // 2. Generate a random normal vector with z = 0
+          let rand_angle = (Math.random() - 0.5) * 2 * Math.PI;
+          let rand_normal = [Math.cos(rand_angle), Math.sin(rand_angle)];
+          let rand_normx = rand_normal[0];
+          let rand_normy = rand_normal[1];
+
+          // plane = rand_normal[0](x - rand_x) + rand_normal[1](y - rand_y)
+          let plane_const = -1 * rand_normx * rand_x + -1 * rand_normy * rand_y; // precomputing since this won't change
+          let denom = Math.sqrt(
+            rand_normx * rand_normx + rand_normy * rand_normy
+          );
+
+          // 3. Go through each vertex, check which side of the plane it lands on
+          for (
+            let vertInd = 0;
+            vertInd < grid.attributes[0].length;
+            vertInd++
+          ) {
+            let x = grid.attributes[0][vertInd][0];
+            let y = grid.attributes[0][vertInd][1];
+
+            let r =
+              Math.abs(rand_normx * x + rand_normy * y + plane_const) / denom;
+            let g_r = 0;
+
+            if (r < 2) {
+              g_r = (1 - (r / R) ** 2) ** 2;
+            }
+
+            let x_diff = x - rand_x;
+            let y_diff = y - rand_y;
+
+            let dot_prod = x_diff * rand_normx + y_diff * rand_normy;
+
+            // If dot product < 0 -> LOWER z coordinate by some delta
+            if (dot_prod < 0) {
+              grid.attributes[0][vertInd][2] -= fault_delta * g_r;
+            } else {
+              grid.attributes[0][vertInd][2] += fault_delta * g_r;
+            }
+          }
+        }
+
+        // // Find min and max height
+        let min_height = grid.attributes[0][0][2];
+        let max_height = grid.attributes[0][0][2];
+
+        for (let vertInd = 0; vertInd < grid.attributes[0].length; vertInd++) {
+          if (grid.attributes[0][vertInd][2] < min_height) {
+            min_height = grid.attributes[0][vertInd][2];
+          }
+          if (grid.attributes[0][vertInd][2] > max_height) {
+            max_height = grid.attributes[0][vertInd][2];
+          }
+        }
+
+        // Replace heights with normalized heights
+        for (let vertInd = 0; vertInd < grid.attributes[0].length; vertInd++) {
+          let prev_height = grid.attributes[0][vertInd][2];
+          let new_height =
+            (c * (prev_height - 0.5 * (min_height + max_height))) /
+            (max_height - min_height);
+          grid.attributes[0][vertInd][2] = new_height;
+        }
+
+        // Computing the normals (if vertex is at the edge use the vertex itself)
+        for (let i = 0; i < gridsize; i++) {
+          for (let j = 0; j < gridsize; j++) {
+            let my_index = i * gridsize + j;
+
+            let north_index = my_index - gridsize;
+            if (i == 0) {
+              north_index = my_index;
+            }
+
+            let south_index = my_index + gridsize;
+            if (i == gridsize - 1) {
+              south_index = my_index;
+            }
+
+            let east_index = my_index + 1;
+            if (j == gridsize - 1) {
+              east_index = my_index;
+            }
+
+            let west_index = my_index - 1;
+            if (j == 0) {
+              west_index = my_index;
+            }
+
+            let north_vertex = grid.attributes[0][north_index];
+            let south_vertex = grid.attributes[0][south_index];
+            let east_vertex = grid.attributes[0][east_index];
+            let west_vertex = grid.attributes[0][west_index];
+            let sub1 = [
+              north_vertex[0] - south_vertex[0],
+              north_vertex[1] - south_vertex[1],
+              north_vertex[2] - south_vertex[2],
+            ];
+            let sub2 = [
+              east_vertex[0] - west_vertex[0],
+              east_vertex[1] - west_vertex[1],
+              east_vertex[2] - west_vertex[2],
+            ];
+            let bf = sub1[1] * sub2[2];
+            let ce = sub1[2] * sub2[1];
+            let cd = sub1[2] * sub2[0];
+            let af = sub1[0] * sub2[2];
+            let ae = sub1[0] * sub2[1];
+            let bd = sub1[1] * sub2[0];
+
+            let normal = [bf - ce, cd - af, ae - bd];
+            grid.attributes[2].push(normalize(normal));
+          }
+        }
+        window.geom = setupGeomery(grid);
+      }
+    </script>
+
+    <!-- All the other code in one big script element. -->
+    <script>
+      let eye = m3mul(m3rotX(10), [0, 0, 7]);
+      let up = [0, 1, 0];
+      let f = normalize([-eye[0], -eye[1], -eye[2]]);
+      let lightdir = normalize([0.5, 1.5, 1]);
+      let r = normalize(cross(f, up));
+      let u = normalize(cross(r, f));
+
+      function rotateAroundAxis(v, axis, angle) {
+        let c = Math.cos(angle);
+        let s = Math.sin(angle);
+
+        let term1 = mul(v, c);
+        let term2 = mul(cross(axis, v), s);
+        let term3 = mul(axis, dot(axis, v) * (1 - c));
+
+        return add(add(term1, term2), term3);
+      }
+
+      /** Draw one frame */
+      function draw(seconds) {
+        gl.clearColor(1.0, 1.0, 1.0, 1.0); // f(...[1,2,3]) means f(1,2,3)
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        gl.useProgram(program);
+
+        if (window.geom) {
+          gl.bindVertexArray(geom.vao);
+
+          let scalarMult = 0.1;
+
+          let moved = false;
+
+          if ("s" in keysBeingPressed && keysBeingPressed["s"] === true) {
+            eye = add(eye, mul(f, -0.01 * scalarMult));
+            moved = true;
+          }
+
+          if ("w" in keysBeingPressed && keysBeingPressed["w"] === true) {
+            eye = add(eye, mul(f, 0.01 * scalarMult));
+            moved = true;
+          }
+
+          if ("d" in keysBeingPressed && keysBeingPressed["d"] === true) {
+            eye = add(eye, mul(r, 0.01 * scalarMult));
+            moved = true;
+          }
+
+          if ("a" in keysBeingPressed && keysBeingPressed["a"] === true) {
+            eye = add(eye, mul(r, -0.01 * scalarMult));
+            moved = true;
+          }
+
+          if (
+            "ArrowDown" in keysBeingPressed &&
+            keysBeingPressed["ArrowDown"] === true
+          ) {
+            // Rotate forward around right
+            f = normalize(rotateAroundAxis(f, r, -0.001));
+            moved = true;
+          }
+
+          if (
+            "ArrowUp" in keysBeingPressed &&
+            keysBeingPressed["ArrowUp"] === true
+          ) {
+            f = normalize(rotateAroundAxis(f, r, 0.001));
+            moved = true;
+          }
+
+          if (
+            "ArrowLeft" in keysBeingPressed &&
+            keysBeingPressed["ArrowLeft"] === true
+          ) {
+            f = normalize(rotateAroundAxis(f, up, 0.001));
+          }
+
+          if (
+            "ArrowRight" in keysBeingPressed &&
+            keysBeingPressed["ArrowRight"] === true
+          ) {
+            f = normalize(rotateAroundAxis(f, up, -0.001));
+          }
+
+          if (Math.abs(f[1]) > 0.99) {
+            // avoids it being parallel
+            f[1] = Math.sign(f[1]) * 0.99;
+            f = normalize(f);
+          }
+
+          r = normalize(cross(f, up));
+          u = normalize(cross(r, f));
+
+          // Create rotation matrix
+          let rot = new Float32Array(16);
+
+          rot[0] = r[0];
+          rot[1] = u[0];
+          rot[2] = -f[0];
+
+          rot[4] = r[1];
+          rot[5] = u[1];
+          rot[6] = -f[1];
+
+          rot[8] = r[2];
+          rot[9] = u[2];
+          rot[10] = -f[2];
+          rot[15] = 1;
+
+          // RT
+          let xcoord = eye[0] * (gridsize / 2) + gridsize / 2;
+          let ycoord = eye[1] * (gridsize / 2) + gridsize / 2;
+
+          let x1_int = Math.max(Math.min(Math.floor(xcoord), gridsize - 1), 0);
+          let y1_int = Math.max(Math.min(Math.floor(ycoord), gridsize - 1), 0);
+
+          let x1_float = Math.max(Math.min(xcoord, gridsize - 1), 0);
+          let y1_float = Math.max(Math.min(ycoord, gridsize - 1), 0);
+
+          let x2_int = Math.min(x1_int + 1, gridsize - 1);
+          let y2_int = Math.min(y1_int + 1, gridsize - 1);
+
+          let bl_index = y1_int * gridsize + x1_int; // bottom-left
+          let br_index = y1_int * gridsize + x2_int; // bottom-right
+          let tl_index = y2_int * gridsize + x1_int; // top-left
+          let tr_index = y2_int * gridsize + x2_int; // top-right
+
+          let h_bl = grid.attributes[0][bl_index][2];
+          let h_br = grid.attributes[0][br_index][2];
+          let h_tl = grid.attributes[0][tl_index][2];
+          let h_tr = grid.attributes[0][tr_index][2];
+
+          let fx = x1_float - x1_int;
+          let fy = y1_float - y1_int;
+
+          let terrainHeight = scalarLerp(
+            fy,
+            scalarLerp(fx, h_bl, h_br),
+            scalarLerp(fx, h_tl, h_tr)
+          );
+
+          if (moved) {
+            eye[2] += (terrainHeight - eye[2]) * 0.001;
+          }
+          let eyeToOrigin = mul(eye, -1);
+          let v = m4mul(rot, m4trans(...eyeToOrigin, 0));
+
+          let lightv = m4mul(v, [...lightdir, 0]);
+          let lightdirnorm = normalize([lightv[0], lightv[1], lightv[2]]);
+          gl.uniform4fv(program.uniforms.lightdir, [...lightdirnorm, 0]);
+
+          gl.uniform3fv(program.uniforms.lightcolor, [1, 1, 1]);
+
+          gl.uniform4fv(program.uniforms.eyepos, m4mul(v, [...eye, 1]));
+          let view_final = m4mul(v, m4rotX(0.5 * Math.PI), m4scale(3, 3, 3));
+
+          gl.uniformMatrix4fv(program.uniforms.mv, false, view_final);
+          gl.uniformMatrix4fv(program.uniforms.p, false, p);
+          gl.drawElements(geom.mode, geom.count, geom.type, 0);
+        }
+      }
+
+      // /** Compute any time-varying or animated aspects of the scene */
+      function tick(milliseconds) {
+        let seconds = milliseconds / 1000;
+
+        draw(seconds);
+        requestAnimationFrame(tick);
+      }
+
+      /** Resizes the canvas to completely fill the screen */
+      function fillScreen() {
+        let canvas = document.querySelector("canvas");
+        document.body.style.margin = "0";
+        canvas.style.width = "100%";
+        canvas.style.height = "100%";
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+        canvas.style.width = "";
+        canvas.style.height = "";
+        gl.viewport(0, 0, canvas.width, canvas.height);
+        window.p = m4perspNegZ(0.1, 20, 1, canvas.width, canvas.height);
+      }
+
+      window.keysBeingPressed = {};
+      window.addEventListener(
+        "keydown",
+        (event) => (keysBeingPressed[event.key] = true)
+      );
+      window.addEventListener(
+        "keyup",
+        (event) => (keysBeingPressed[event.key] = false)
+      );
+
+      /** Compile, link, set up geometry */
+      window.addEventListener("load", async (event) => {
+        window.gl = document.querySelector("canvas").getContext(
+          "webgl2",
+          // optional configuration object: see https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext
+          { antialias: false, depth: true, preserveDrawingBuffer: true }
+        );
+        let vs = document.querySelector("#vert").textContent.trim();
+        let fs = document.querySelector("#frag").textContent.trim();
+        window.program = compileShader(vs, fs);
+        gl.enable(gl.DEPTH_TEST);
+        fillScreen();
+        window.addEventListener("resize", fillScreen);
+        generateGrid();
+        requestAnimationFrame(tick);
+      });
+    </script>
+
+    <style>
+      body {
+        margin: 0;
+        border: none;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 100vh;
+      }
+      .controls {
+        flex: 0 0 auto;
+      }
+      .controls > * {
+        margin: 1em;
+      }
+      .display {
+        flex-grow: 1;
+        line-height: 0rem;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="display">
+      <canvas width="300" height="300"></canvas>
+    </div>
+  </body>
+</html>
