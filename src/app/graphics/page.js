@@ -7,6 +7,13 @@ export default function Graphics() {
         My Graphics
       </h1>
 
+      <h1 className="text-lg mb-10 text-center italic">
+        A from-scratch WebGL2 rendering pipeline. By avoiding graphics
+        frameworks, this project explores how real-time systems are built around
+        data pipelines, parallel GPU execution, and precise mathematical
+        transformations.
+      </h1>
+
       <div className="grid grid-cols-3 gap-6 w-full">
         <GraphicsDemo
           explanation={
