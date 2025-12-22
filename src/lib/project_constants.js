@@ -64,7 +64,7 @@ export const projects = [
     image: "/projects/graphics_img.png",
     link: "https://www.vaniramesh.com/graphics",
     icon: <HappyIcon />,
-    accomplishments: "Created in a few hours!",
+    accomplishments: "Learning computer graphics from scratch.",
     tech: "WebGL2",
   },
   {
