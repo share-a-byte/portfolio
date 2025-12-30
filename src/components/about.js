@@ -74,7 +74,7 @@ export default function About() {
             </div>
           </motion.div>
           <motion.div
-            className="flex justify-end"
+            className="flex justify-end pr-10"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
@@ -82,14 +82,14 @@ export default function About() {
             <img
               alt="Vani Ramesh"
               className="rounded-lg object-cover shadow-md shadow-white"
-              height={400}
+              height={100}
               src="/projects/me.jpg"
               style={{
-                aspectRatio: "400/400",
+                aspectRatio: "100/100",
                 objectFit: "cover",
                 objectPosition: "center 20%",
               }}
-              width={400}
+              width={300}
             />
           </motion.div>
         </div>
