@@ -21,8 +21,8 @@ export default function About() {
             </p>
             <p className="max-w-[600px] text-white md:text-xl pl-1">
               I&apos;m a dedicated CS student @ UIUC with a passion for
-              leveraging technology to tackle <b>systemic challenges</b> and
-              drive <b>meaningful change!</b>
+              leveraging technology to tackle systemic challenges and drive{" "}
+              <b>meaningful change!</b>
             </p>
             <div className="flex flex-col gap-2 min-[400px]:flex-row">
               <Link
@@ -58,13 +58,13 @@ export default function About() {
                   <path d="M7.2 8.809H4V19.5h3.2V8.809Z" />
                 </svg>
               </Link>
-              <Link
+              {/* <Link
                 className="inline-flex justify-center items-center rounded-lg px-2 py-1 bg-violet-400 hover:bg-violet-500"
                 href="https://vaniramesh.substack.com/"
                 target="_blank"
               >
                 <NotebookPen className="text-black" />
-              </Link>
+              </Link> */}
               {/* <Link
                 className="inline-flex h-10 items-center justify-center rounded-md border border-gray-200 bg-white px-8 text-sm font-medium shadow-sm transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-950 disabled:pointer-events-none disabled:opacity-50 dark:border-gray-800 dark:bg-gray-950 dark:hover:bg-gray-800 dark:hover:text-gray-50 dark:focus-visible:ring-gray-300 dark:border-gray-800"
                 href="#projects"
@@ -74,7 +74,7 @@ export default function About() {
             </div>
           </motion.div>
           <motion.div
-            className="flex justify-end"
+            className="flex justify-end pr-10"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
@@ -82,14 +82,14 @@ export default function About() {
             <img
               alt="Vani Ramesh"
               className="rounded-lg object-cover shadow-md shadow-white"
-              height={400}
+              height={100}
               src="/projects/me.jpg"
               style={{
-                aspectRatio: "400/400",
+                aspectRatio: "100/100",
                 objectFit: "cover",
                 objectPosition: "center 20%",
               }}
-              width={400}
+              width={300}
             />
           </motion.div>
         </div>
